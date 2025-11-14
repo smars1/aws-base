@@ -1,7 +1,6 @@
 ## ⚙️ 1️⃣ Requisitos previos
-gh repo bootcamp-auxiliar --public --source=. --remote=origin --push
-
 Antes de comenzar, asegúrate de tener instaladas las siguientes herramientas:
+De no tener instaladas las herramientas instalar en configuracion por defecto siempre.
 
 | Herramienta | Requerido | Comando para verificar | url descarga |
 |--------------|------------|------------------------| --- |
