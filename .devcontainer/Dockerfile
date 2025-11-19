@@ -11,11 +11,21 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     software-properties-common
 
+# Install Python dependencies
+#RUN pip3 install --no-cache-dir     boto3==1.34.94     pandas==2.2.4   requests==2.32.3
+
+# Install Python dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+
+
 # Install AWS CLI v2
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
     && ./aws/install \
     && rm -rf aws awscliv2.zip
+
+
 
 # Install Terraform (correct modern method)
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg && \
