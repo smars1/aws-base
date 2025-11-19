@@ -1,11 +1,13 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
-# Install base dependencies
+# Install necessary packages
 RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     python3 \
     python3-pip \
+    python3-venv \
+    python3.12-venv \
     groff \
     less \
     gnupg \
