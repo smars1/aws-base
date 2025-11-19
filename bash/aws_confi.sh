@@ -27,7 +27,7 @@ if [ -z "$AWS_REGION" ]; then
 fi
 
 echo ""
-echo "🚀 Configurando AWS CLI..."
+echo "Configurando AWS CLI..."
 
 # Crear carpeta si no existe
 mkdir -p ~/.aws
