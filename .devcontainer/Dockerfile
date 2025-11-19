@@ -11,12 +11,20 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     software-properties-common
 
-# Install Python dependencies
+# Install Python dependencies [evitar haacer esto en el dockerfile]
 #RUN pip3 install --no-cache-dir     boto3==1.34.94     pandas==2.2.4   requests==2.32.3
 
-# Install Python dependencies
+# Create virtual environment
+RUN python3 -m venv /opt/venv
+
+# Activate env for all future commands
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy requirements
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+
+# Install python dependencies inside the virtual environment
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 
 # Install AWS CLI v2
