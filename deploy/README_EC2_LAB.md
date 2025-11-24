@@ -57,43 +57,43 @@ Alumno:
 ---
 
 # 3. Estructura sugerida
-
+```
 bootcamp_institue/
 │── deploy/
 │     ├── deploy_ec2_ssm.sh
 │     └── cloud_formation/template_ec2.yaml
 │── .env
-
+```
 ---
 
 # 4. Archivo .env
-
+```
 VPC_ID=vpc-xxxx
 SUBNET_ID=subnet-xxxx
 USERNAME=DiegoAtzin
 ENVNAME=dev
 TEMPLATE_FILE=./deploy/cloud_formation/template_ec2.yaml
 AMI_ID=ami-0ecb62995f68bb549
-
+```
 ---
 
 # 5. Ejecución del despliegue
-
+```
 ./deploy/deploy_ec2_ssm.sh
-
+```
 ---
 
 # 6. Conexión via SSM
-
+```
 aws ssm start-session --target i-xxxxxxxxxxxxxx
-
+```
 ---
 
 # 7. Errores comunes
-
+```
 ROLBACK_COMPLETE → borrar stack  
 PublicIp no existe → subnet sin IP pública habilitada
-
+```
 ---
 
 # 8. Conclusiones
