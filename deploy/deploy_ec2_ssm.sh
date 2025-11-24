@@ -12,8 +12,17 @@ fi
 
 VPC_ID="${VPC_ID:-}"
 SUBNET_ID="${SUBNET_ID:-}"
-STUDENT_ID="${STUDENT_ID:-}"
-TEMPLATE_FILE="${TEMPLATE_FILE:-}"
+USERNAME="${USERNAME:-}"
+ENVNAME="${ENVNAME:-dev}"
+TEMPLATE_FILE="${TEMPLATE_FILE:-template.yml}"
+AMI_ID="${AMI_ID:-ami-0ecb62995f68bb549}"
+
+echo -e "VPC_ID: $VPC_ID"
+echo -e "SUBNET_ID: $SUBNET_ID"
+echo -e "USERNAME: $USERNAME"
+echo -e "ENVNAME: $ENVNAME"
+echo -e "TEMPLATE_FILE: $TEMPLATE_FILE"
+echo -e "AMI_ID: $AMI_ID"
 
 if [[ -z "$VPC_ID" ]]; then
     read -p "Enter VPC ID: " VPC_ID
@@ -21,8 +30,8 @@ fi
 if [[ -z "$SUBNET_ID" ]]; then
     read -p "Enter Subnet ID: " SUBNET_ID
 fi
-if [[ -z "$STUDENT_ID" ]]; then
-    read -p "Enter Student ID: " STUDENT_ID
+if [[ -z "$USERNAME" ]]; then
+    read -p "Enter Student ID: " USERNAME
 fi
 if [[ -z "$TEMPLATE_FILE" ]]; then
     read -p "Enter template file name: " TEMPLATE_FILE
@@ -33,15 +42,22 @@ if [[ ! -f "$TEMPLATE_FILE" ]]; then
     exit 1
 fi
 
-STACK_NAME="ec2-lab-${STUDENT_ID}"
+STACK_NAME="ec2-lab-${ENVNAME}-${USERNAME}"
+echo -e "Deploying stack: $STACK_NAME using template: $TEMPLATE_FILE"
 
-aws cloudformation deploy  \
-   --stack-name "$STACK_NAME" \
+aws cloudformation deploy \
    --template-file "$TEMPLATE_FILE" \
-   --parameter-overrides VpcId="$VPC_ID" \
-    SubnetId="$SUBNET_ID" \
-    StudentId="$STUDENT_ID" \
-    --capabilities CAPABILITY_NAMED_IAM
+   --stack-name "$STACK_NAME" \
+   --parameter-overrides \
+      UserName="$USERNAME" \
+      VpcId="$VPC_ID" \
+      SubnetId="$SUBNET_ID" \
+      EnvName="$ENVNAME" \
+      AmiId="$AMI_ID" \
+   --capabilities CAPABILITY_NAMED_IAM
 
-echo "To connect:"
-echo "aws ssm start-session --target \$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='InstanceId'].OutputValue" --output text)"
+echo "Deployment initiated for stack: $STACK_NAME"
+echo ""
+echo "To connect via SSM:"
+echo ""
+echo "aws ssm start-session --target \$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].Outputs[?OutputKey==\`MyEC2InstanceId\`].OutputValue' --output text)"
