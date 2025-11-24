@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Plantilla de CloudFormation para crear una instancia EC2
+
+Parameters:
+  
+  UserName:
+    Type: String
+    Description: Nombre del usuario que despliega la plantilla
+    Default: ${USERNAME}
+
+  EnvName:
+    Type: String
+    Description: Nombre del entorno (dev, prod, etc.)
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+  InstanceType:
+    Type: String
+    Description: Tipo de instancia EC2
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t2.micro
+      - t2.small
+      - t2.medium
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: ID de la subred donde se lanzará la instancia EC2
+    
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: ID de la VPC donde se lanzará la instancia EC2
+
+  AmiId:
+    Type: String
+    Description: ID de la AMI para la instancia EC2
+    Default: ami-0ecb62995f68bb549 # remplazar con la AMI deseada en este caso ubuntu 20.04  
+
+Resources:
+
+  EC2SSMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "ec2-ssm-role-${EnvName}-${UserName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+
+  # Perfil de instancia para la instancia EC2
+  # Asocia el rol IAM a la instancia EC2
+  # Esto permite que la instancia EC2 asuma el rol y utilice los permisos definidos en él
+  # Las instancias EC2 necesitan un perfil de instancia para usar roles IAM
+  # Pero las instancias no pueden asumir roles directamente
+  # Por lo tanto, se crea un perfil de instancia que contiene el rol IAM
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2SSMRole
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG sin reglas de entrada ni salida, solo AWS SSM
+      VpcId: !Ref VpcId
+
+  # Instancia EC2
+  # Integra el perfil de instancia para que la instancia pueda asumir el rol IAM
+  # Esto permite que la instancia EC2 utilice los permisos definidos en el rol IAM asociado  
+ 
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref AmiId
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          SubnetId: !Ref SubnetId
+          AssociatePublicIpAddress: true
+          GroupSet:
+            - !Ref InstanceSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "MyEC2Instance-${EnvName}-${UserName}"
+
+
+Outputs:
+  MyEC2InstanceId:
+    Description: ID de la instancia EC2 creada
+    Value: !Ref MyEC2Instance
+
+  EC2InstancePublicIP:
+    Description: Dirección IP pública de la instancia EC2
+    Value: !GetAtt MyEC2Instance.PublicIp
+
+  SSMCommand:
+    Description: Comando SSM para conectarse a la instancia EC2
+    Value: !Sub "aws ssm start-session --target ${MyEC2Instance}"  
