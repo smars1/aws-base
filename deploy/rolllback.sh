@@ -11,7 +11,7 @@ fi
 USERNAME="${USERNAME:-}"
 ENVNAME="${ENVNAME:-dev}"
 
-STACK_NAME="ec2-lab-${USERNAME}-${ENVNAME}"
+STACK_NAME="ec2-lab-${ENVNAME}-${USERNAME}"
 ROLE_NAME="ec2-ssm-role-${ENVNAME}-${USERNAME}"
 
 echo "Eliminando stack $STACK_NAME ..."
