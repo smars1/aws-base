@@ -1,47 +1,36 @@
-import logging
-
-# general logger configuration (usar solo en el entrypoint)
-logging.basicConfig(
-    level=logging.INFO,  # default level
-    #format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-    format="%(asctime)s | %(levelname)s  | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-
-logger = logging.getLogger()
-
-class Dev_ipv4_cidr:
-    def __init__(self, cidr_block, debug=False):
-        if not isinstance(cidr_block, str):
-            raise ValueError("CIDR block must be ipv4 string format")
-        if '/' not in cidr_block:
-            raise ValueError("CIDR block must contain '/' character")
-        if cidr_block.count('.') != 3:
-            raise ValueError("CIDR block must be in ipv4 format")
-        if not (0 <= int(cidr_block.split('/')[1]) <= 32):
-            raise ValueError("CIDR prefix must be between 0 and 32")
-        
+class CidrCalc:
+    def __init__(self, cidr_block: str):
+        """
+        param cidr_block: str: CIDR block en cadena de texto (e.g., "10.0.0.0/27"
+        """
         self.cidr_block = cidr_block
+        print(f"este es el bloque cidr {cidr_block}")
+        validate_cidr_block = cidr_block.split('/')
+        print(f"este es el bloque cidr cuando se hace split a la cadena {validate_cidr_block}")
+        print(f"este es el tipo de dato del cidr_block {type(cidr_block)}")
+        print(f"este es el tipo de dato del validate_cidr_block[1]: valor: {validate_cidr_block[1]} es tipo {type(validate_cidr_block[1])}")
+        int_cidr_suffix = int(validate_cidr_block[1])
+        print(f"este es el valor y tipo de dato del int_cidr: valor {int_cidr_suffix} tipo: {type(int_cidr_suffix)}")
         
+        if not isinstance(cidr_block, str):
+            raise ValueError("CIDR debe ser una cadena de texto")
+        if not (16 <= int_cidr_suffix <= 28):
+            raise ValueError("CIDR debe estar entre 16 y 28")
+        self.cidr_block = cidr_block
 
-    def get_mycidr(self):
-            return self.cidr_block
+    def get_cidr(self):
+        return self.cidr_block
     
-    def get_aws_usable_ips(self):
+    def get_total_ips(self):
         prefix = int(self.cidr_block.split('/')[1])
-        logger.info(f"Calculating AWS usable IPs for CIDR: {self.cidr_block} with prefix: {prefix}")
-        total_ips = 2 ** (32 - prefix)
-        logger.info(f"Total IPs calculated: {total_ips}")
-        if total_ips <= 4:
-            no_usable_ip= max(0, total_ips - 2)  # No usable IPs for /31 and /32
-            logger.info(f"CIDR block too small, returning {no_usable_ip} usable IPs")
-            return no_usable_ip
-        return total_ips - 5  # Subtract AWS reserved IPs
+        total_ips = (2 ** (32 - prefix)) - 5  # Restar 5 IPs reservadas por AWS
+        return total_ips
     
+
 def main():
-    cidr = Dev_ipv4_cidr("10.0.0./27")
-    logger.info(f"Total usable AWS IPs in {cidr.get_mycidr()} are: {cidr.get_aws_usable_ips()}")  # Output: Total usable AWS IPs in
+    cidr = CidrCalc("10.0.0.0/8")
+    print(f"CIDR Block: {cidr.get_cidr()}")  # Output: CIDR Block:  
+    print(f"Total IPs en {cidr.get_cidr()}: {cidr.get_total_ips()}")  # Output: Total IPs in
 
 if __name__ == "__main__":
     main()
-
