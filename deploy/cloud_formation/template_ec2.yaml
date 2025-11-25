@@ -1,16 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Plantilla de CloudFormation para crear una instancia EC2
+Description: CloudFormation template to create an EC2 instance with SSM access and public subnet routing
 
 Parameters:
   
   UserName:
     Type: String
-    Description: Nombre del usuario que despliega la plantilla
-    Default: ${USERNAME}
+    Description: User that deploys the stack
+    Default: user
 
   EnvName:
     Type: String
-    Description: Nombre del entorno (dev, prod, etc.)
+    Description: Environment name
     Default: dev
     AllowedValues:
       - dev
@@ -18,7 +18,7 @@ Parameters:
 
   InstanceType:
     Type: String
-    Description: Tipo de instancia EC2
+    Description: EC2 instance type
     Default: t3.micro
     AllowedValues:
       - t3.micro
@@ -28,19 +28,53 @@ Parameters:
 
   SubnetId:
     Type: AWS::EC2::Subnet::Id
-    Description: ID de la subred donde se lanzará la instancia EC2
+    Description: Subnet where EC2 instance will be deployed
     
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: ID de la VPC donde se lanzará la instancia EC2
+    Description: VPC ID used by subnet
 
   AmiId:
     Type: String
-    Description: ID de la AMI para la instancia EC2
-    Default: ami-0ecb62995f68bb549 # remplazar con la AMI deseada en este caso ubuntu 20.04  
+    Description: AMI ID for the EC2 instance
+    Default: ami-0fa3fe0fa7920f68e # Amazon Linux 2
 
 Resources:
 
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  # Attach IGW to VPC
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VpcId
+      InternetGatewayId: !Ref InternetGateway
+
+  # Route Table for public subnet
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcId
+
+  # Default route: 0.0.0.0/0 -> IGW
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  # Associate route table with subnet
+  RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetId
+      RouteTableId: !Ref PublicRouteTable
+
+  # IAM role for SSM
   EC2SSMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -56,29 +90,21 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
 
-  # Perfil de instancia para la instancia EC2
-  # Asocia el rol IAM a la instancia EC2
-  # Esto permite que la instancia EC2 asuma el rol y utilice los permisos definidos en él
-  # Las instancias EC2 necesitan un perfil de instancia para usar roles IAM
-  # Pero las instancias no pueden asumir roles directamente
-  # Por lo tanto, se crea un perfil de instancia que contiene el rol IAM
+  # Instance profile needed by EC2
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
         - !Ref EC2SSMRole
 
+  # Security group without inbound rules
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: SG sin reglas de entrada ni salida, solo AWS SSM
+      GroupDescription: SG without inbound or outbound rules, only SSM
       VpcId: !Ref VpcId
 
-  # Instancia EC2
-  # Integra el perfil de instancia para que la instancia pueda asumir el rol IAM
-  # Esto permite que la instancia EC2 utilice los permisos definidos en el rol IAM asociado  
- 
-
+  # EC2 instance with SSM
   MyEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -95,16 +121,16 @@ Resources:
         - Key: Name
           Value: !Sub "MyEC2Instance-${EnvName}-${UserName}"
 
-
 Outputs:
+
   MyEC2InstanceId:
-    Description: ID de la instancia EC2 creada
+    Description: EC2 instance ID
     Value: !Ref MyEC2Instance
 
   EC2InstancePublicIP:
-    Description: Dirección IP pública de la instancia EC2
+    Description: Public IP of EC2 instance
     Value: !GetAtt MyEC2Instance.PublicIp
 
   SSMCommand:
-    Description: Comando SSM para conectarse a la instancia EC2
-    Value: !Sub "aws ssm start-session --target ${MyEC2Instance}"  
+    Description: SSM command to connect to instance
+    Value: !Sub "aws ssm start-session --target ${MyEC2Instance}"
