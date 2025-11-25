@@ -39,7 +39,7 @@ class Dev_ipv4_cidr_logger:
         return total_ips - 5  # Subtract AWS reserved IPs
     
 def main():
-    cidr = Dev_ipv4_cidr("10.0.0./27")
+    cidr = Dev_ipv4_cidr_logger("10.0.0./27")
     logger.info(f"Total usable AWS IPs in {cidr.get_mycidr()} are: {cidr.get_aws_usable_ips()}")  # Output: Total usable AWS IPs in
 
 if __name__ == "__main__":
