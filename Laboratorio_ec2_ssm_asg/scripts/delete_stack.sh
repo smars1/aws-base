@@ -2,6 +2,18 @@
 # Improved delete script (keeps original delete_stack.sh untouched)
 # Usage: STACK_NAME=your-stack SSM_PREFIX=/your/prefix ./scripts/delete_stack.sh
 
+if [ -f .env ]; then
+  echo "[INFO] Cargando variables desde .env..."
+  export $(grep -v '^#' .env | xargs)
+else
+  echo "[WARN] No se encontró .env — se usarán valores de entorno o defaults."
+fi
+
+# ============================================================
+# 2. VARIABLES BASE (pueden ser sobrescritas por .env)
+# ============================================================
+
+
 STACK_NAME="${STACK_NAME:-gabriel-stack}"
 REGION="${REGION:-us-east-1}"
 PROFILE="${PROFILE:-default}"

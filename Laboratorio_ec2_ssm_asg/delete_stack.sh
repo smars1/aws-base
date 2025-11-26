@@ -1,10 +1,22 @@
 
 #!/bin/bash
 # Script para eliminar el stack de CloudFormation y esperar hasta su eliminación completa
+# ============================================================
+# 1. CARGAR VARIABLES DESDE .env
+# ============================================================
 
-STACK_NAME="gabriel-stack"
-REGION="us-east-1"
-PROFILE="default"
+if [ -f .env ]; then
+  echo "[INFO] Cargando variables desde .env..."
+  export $(grep -v '^#' .env | xargs)
+else
+  echo "[WARN] No se encontró .env — se usarán valores de entorno o defaults."
+fi
+
+
+STACK_NAME="${STACK_NAME:-gabriel-stack}"
+REGION="${REGION:-us-east-1}"
+PROFILE="${PROFILE:-default}"
+
 
 echo "Solicitando eliminación del stack $STACK_NAME..."
 aws cloudformation delete-stack \

@@ -1,6 +1,26 @@
 #!/bin/bash
 # Script para crear o actualizar el stack de CloudFormation de forma parametrizada
 
+
+
+#!/bin/bash
+# Script para crear o actualizar el stack de CloudFormation con parámetros dinámicos
+
+# ============================================================
+# 1. CARGAR VARIABLES DESDE .env
+# ============================================================
+
+if [ -f .env ]; then
+  echo "[INFO] Cargando variables desde .env..."
+  export $(grep -v '^#' .env | xargs)
+else
+  echo "[WARN] No se encontró .env — se usarán valores de entorno o defaults."
+fi
+
+# ============================================================
+# 2. VARIABLES BASE (pueden ser sobrescritas por .env)
+# ============================================================
+
 STACK_NAME="${STACK_NAME:-gabriel-stack}"
 TEMPLATE_FILE="${TEMPLATE_FILE:-infra.yml}"
 REGION="${REGION:-us-east-1}"
