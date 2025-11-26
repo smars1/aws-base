@@ -37,10 +37,11 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
 
 RUN aws --version
 
+# Instala Session Manager Plugin
 RUN curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
-
-
 RUN sudo dpkg -i session-manager-plugin.deb
+
+# Verifica la instalación del Session Manager Plugin 
 RUN session-manager-plugin --version
 
 # Instala Terraform
