@@ -35,7 +35,13 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     && ./aws/install \
     && rm -rf aws awscliv2.zip
 
+RUN aws --version
 
+RUN curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+
+
+RUN sudo dpkg -i session-manager-plugin.deb
+RUN session-manager-plugin --version
 
 # Instala Terraform
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg && \
