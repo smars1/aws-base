@@ -9,7 +9,7 @@ Parameters:
     Description: AMI más reciente de Amazon Linux 2023.
   VpcId:
     Type: String
-    Default: vpc-077036bfcbb11d434
+    Default: vpc-006d0d41294f547b5
     Description: ID de la VPC por defecto.
   SubnetId:
     Type: String
