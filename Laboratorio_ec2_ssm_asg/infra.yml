@@ -5,7 +5,7 @@ Description: |
 Parameters:
   LatestAmiId:
     Type: String
-    Default: ami-0341d95f75f311023 # ID AMI más reciente
+    Default: ami-0f00d706c4a80fd93 # ID AMI más reciente
     Description: AMI más reciente de Amazon Linux 2023.
   VpcId:
     Type: String
@@ -20,19 +20,19 @@ Parameters:
     Description: Tipo de instancia EC2.
   InstanceName:
     Type: String
-    Default: gabriel
+    Default: diegoatzin
     Description: Nombre de la instancia EC2.
   SecurityGroupId:
     Type: String
-    Default: sg-08fd9307f7c135213
+    Default: sg-049b49f67531ff6e7
     Description: ID del grupo de seguridad por defecto de la VPC.
   LaunchTemplateName:
     Type: String
-    Default: lt-gabriel
+    Default: lt-diegoatzin
     Description: Nombre del Launch Template para EC2.
   AutoScalingGroupName:
     Type: String
-    Default: asg-gabriel
+    Default: asg-diegoatzin
     Description: Nombre del Auto Scaling Group.
   MinSize:
     Type: String
@@ -48,15 +48,15 @@ Parameters:
     Description: Capacidad deseada del grupo de autoescalado.
   Subnet1:
     Type: String
-    Default: subnet-0768550a08edf7c74
+    Default: subnet-0cd763912bbe76331
     Description: ID de la primera subred pública.
   Subnet2:
     Type: String
-    Default: subnet-021f2eade5dd37c7c
+    Default: subnet-02bf22bf1b5a27a35
     Description: ID de la segunda subred pública.
   TagName:
     Type: String
-    Default: Web Server - Gabriel
+    Default: Web Server - diegoatzin
     Description: Valor de la etiqueta Name para instancias EC2.
 
 Resources:
